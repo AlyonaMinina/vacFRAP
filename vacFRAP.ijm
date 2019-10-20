@@ -1,6 +1,10 @@
 // ask the user for the directory with images to process
 dir = getDirectory("Choose directory");
 
+// also ask for the upper threshold limit
+scan_speed = getNumber("Scanning speed, sec/frame", 0.743);
+
+
 // get file listing
 list = getFileList(dir);
 newlist = list;
@@ -33,7 +37,9 @@ for(w = 0; w < imglist.length; w++) {
 	run("Bio-Formats Windowless Importer", "open=[" + name + "]");
 	
 //get FRAP series name	
-	name = getTitle();
+	title = getTitle;
+    dotIndex = indexOf(title, ".");
+    name = substring(title, 0, dotIndex);
     dir = getInfo("image.directory");
 //Correct for drift 
     run("Correct 3D drift", "channel=1 only=0 lowest=1 highest=1");
@@ -46,23 +52,22 @@ for(w = 0; w < imglist.length; w++) {
 	run("Split Channels");
     close("C2-*");	
     roiManager("Select", 0)
-	run("FRAP Profiler", "curve=[Single exponential recovery] time=0.743");
-    roiManager("Select", 0);
+	run("FRAP Profiler", "curve=[Single exponential recovery] time=scan_speed");
+
 //selected areas can be later used for defining what root zone was analyzed. sic! For this, during scanning all roots must be oriented in the same direction! 
-    run("Set Measurements...", "area bounding display redirect=None decimal=5");
-    roiManager("Show All");
-    roiManager("multi-measure append");
-    selectWindow("Results");
-    saveAs( dir + name +" area.txt");
+    //run("Set Measurements...", "area bounding display redirect=None decimal=5");
+    //roiManager("Show All");
+    //roiManager("multi-measure append");
+    //selectWindow("Results");
+    //saveAs("Measurements", dir + name +" cell proportions.csv");
+    //run("Close");
     selectWindow("Log");
-    saveAs( dir + name +" FRAP results.txt");
+    saveAs( dir + name +" FRAP results.txt"); 
+    run("Close");
 	run("Close All");
-	selectWindow("Results");
-	run("Close");
 	selectWindow("ROI Manager");
 	run("Close");
     selectWindow("Plot Values");
     run("Close");
-    selectWindow("Log");
-    run("Close");
+   
 }
