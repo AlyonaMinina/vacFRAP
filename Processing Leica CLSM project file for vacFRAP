@@ -1,0 +1,54 @@
+  save files as individual tiffs (sic! FRAP subfolder in the project not allowed)
+
+run("Bio-Formats Macro Extensions");
+// ask the user for the directory with images to process
+dir = getDirectory("Choose directory");
+// get file listing
+list = getFileList(dir);
+newlist = list;
+// expand directories -- we only recurse one level deep
+// (i.e. main directory with subdirs for each experiment
+for(i = 0; i < list.length; i++) {
+	if (endsWith(list[i], '/')) {
+		files = getFileList(dir + list[i]);
+		for (n = 0; n < files.length; n++) {
+			files[n] = list[i]  + files[n];
+		}
+		newlist = Array.concat(newlist, files);
+	}
+}
+
+list = newlist;
+
+// only process image files
+images = newArray(0);
+for(w = 0; w < list.length; w++) {
+	fn = dir  + list[w];
+	Ext.isThisType(fn, type)
+	if (type == "true") {
+		images = Array.concat(images, fn);
+	}
+}
+
+// process images
+for (n = 0; n < images.length; n++) {
+	Ext.setId(images[n]);
+	Ext.getSeriesCount(count);
+	if (count == 1) {
+		// file contains only one image
+		run("Bio-Formats Windowless Importer", "open=[" + images[n] + "]");
+		name = getTitle();
+		saveAs("tiff", name + ".tif");
+		close();
+	} else {
+		// file contains several images; save each separately
+		for (i = 1; i < count + 1; i++) {
+			Ext.setSeries(i - 1);
+			Ext.getSeriesName(sname);
+			run("Bio-Formats Importer", "open=[" + images[n] + "] series_" + i);
+			saveAs("tiff", dir + sname + ".tif");
+			close();
+		}
+	}
+}
+
