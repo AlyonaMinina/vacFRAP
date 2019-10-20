@@ -1,4 +1,3 @@
-//the macro relies on the use of FRAP profiler plugin
 // ask the user for the directory with images to process
 dir = getDirectory("Choose directory");
 
@@ -36,10 +35,17 @@ for(w = 0; w < imglist.length; w++) {
 //get FRAP series name	
 	name = getTitle();
     dir = getInfo("image.directory");
-    run("ROI Manager...");
-	setTool("freehand");
+//Correct for drift 
+    run("Correct 3D drift", "channel=1 only=0 lowest=1 highest=1");
+	print("\\Clear");
+	selectWindow("registered time points");
 //FRAP profiler requires manual selection of the photobleached area and the whole are of organelle/cell in question. sic! smaller area will be automaticaly considered as photobleacher
-	waitForUser("Select ROI", "Please select photobleached area and the whole vacuole");	
+	run("ROI Manager...");
+	setTool("freehand");
+    waitForUser("Select ROI", "Please select photobleached area and the whole vacuole");
+	run("Split Channels");
+    close("C2-*");	
+    roiManager("Select", 0)
 	run("FRAP Profiler", "curve=[Single exponential recovery] time=0.743");
     roiManager("Select", 0);
 //selected areas can be later used for defining what root zone was analyzed. sic! For this, during scanning all roots must be oriented in the same direction! 
