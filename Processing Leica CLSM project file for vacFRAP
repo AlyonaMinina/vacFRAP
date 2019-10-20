@@ -1,4 +1,4 @@
-  save files as individual tiffs (sic! FRAP subfolder in the project not allowed)
+//save files as individual tiffs (sic! FRAP subfolder in the project not allowed)
 
 run("Bio-Formats Macro Extensions");
 // ask the user for the directory with images to process
