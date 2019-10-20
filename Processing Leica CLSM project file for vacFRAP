@@ -1,5 +1,4 @@
 //save files as individual tiffs (sic! FRAP subfolder in the project not allowed)
-
 run("Bio-Formats Macro Extensions");
 // ask the user for the directory with images to process
 dir = getDirectory("Choose directory");
@@ -17,10 +16,8 @@ for(i = 0; i < list.length; i++) {
 		newlist = Array.concat(newlist, files);
 	}
 }
-
 list = newlist;
-
-// only process image files
+// process only images
 images = newArray(0);
 for(w = 0; w < list.length; w++) {
 	fn = dir  + list[w];
@@ -30,7 +27,7 @@ for(w = 0; w < list.length; w++) {
 	}
 }
 
-// process images
+//save each FRAP session as an individual tiff stack
 for (n = 0; n < images.length; n++) {
 	Ext.setId(images[n]);
 	Ext.getSeriesCount(count);
