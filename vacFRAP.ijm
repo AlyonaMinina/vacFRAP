@@ -41,33 +41,42 @@ for(w = 0; w < imglist.length; w++) {
     dotIndex = indexOf(title, ".");
     name = substring(title, 0, dotIndex);
     dir = getInfo("image.directory");
-//Correct for drift 
-    run("Correct 3D drift", "channel=1 only=0 lowest=1 highest=1");
-	print("\\Clear");
-	selectWindow("registered time points");
-//FRAP profiler requires manual selection of the photobleached area and the whole are of organelle/cell in question. sic! smaller area will be automaticaly considered as photobleacher
-	run("ROI Manager...");
-	setTool("freehand");
-    waitForUser("Select ROI", "Please select photobleached area and the whole vacuole");
-	run("Split Channels");
-    close("C2-*");	
-    roiManager("Select", 0)
-	run("FRAP Profiler", "curve=[Single exponential recovery] time=scan_speed");
 
-//selected areas can be later used for defining what root zone was analyzed. sic! For this, during scanning all roots must be oriented in the same direction! 
-    //run("Set Measurements...", "area bounding display redirect=None decimal=5");
-    //roiManager("Show All");
-    //roiManager("multi-measure append");
-    //selectWindow("Results");
-    //saveAs("Measurements", dir + name +" cell proportions.csv");
-    //run("Close");
-    selectWindow("Log");
-    saveAs( dir + name +" FRAP results.txt"); 
-    run("Close");
-	run("Close All");
-	selectWindow("ROI Manager");
-	run("Close");
-    selectWindow("Plot Values");
-    run("Close");
-   
+regq = getBoolean("Would you like to carry out drift correction?\n");
+if (regq) {
+	    driftCorrection3D();
+        FRAPquantification();
+} else {
+	   FRAPquantification();
+}
+    
+//Correct for drift 
+    function driftCorrection3D() {
+    	run("Correct 3D drift", "channel=1 only=0 lowest=1 highest=1");
+    	print("\\Clear");
+    	selectWindow("registered time points");
+    	}
+//FRAP profiler requires manual selection of the photobleached area and the whole are of organelle/cell in question. sic! smaller area will be automaticaly considered as photobleacher
+	function FRAPquantification() {
+		run("ROI Manager...");
+		setTool("freehand");
+		waitForUser("Select ROI", "Please select photobleached area and the whole vacuole");
+		run("Split Channels");
+		close("C2-*");	
+		roiManager("Select", 0)
+		run("FRAP Profiler", "curve=[Single exponential recovery] time=scan_speed");
+        selectWindow("Log");
+        saveAs( dir + name +" FRAP results.txt");         
+        run("Close");
+        close("/*");	
+        close("C1*");	
+        close("offsetFRAP:*");	
+        run("Images to Stack", "name=[FRAP plots] title=[] use");
+        run("Make Montage...", "columns=2 rows=2 scale=1 label");
+        saveAs("png", dir + name +" FRAPplots.png"); 
+        run("Close All");
+        selectWindow("ROI Manager");
+        run("Close");
+        selectWindow("Plot Values");
+        run("Close");   
 }
