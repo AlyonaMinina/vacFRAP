@@ -41,6 +41,7 @@ for(w = 0; w < imglist.length; w++) {
     dotIndex = indexOf(title, ".");
     name = substring(title, 0, dotIndex);
     dir = getInfo("image.directory");
+    waitForUser("Please scroll through your FRAP time series and decide if it requires drift correction");
 
 regq = getBoolean("Would you like to carry out drift correction?\n");
 if (regq) {
@@ -79,4 +80,5 @@ if (regq) {
         run("Close");
         selectWindow("Plot Values");
         run("Close");   
+        }
 }
