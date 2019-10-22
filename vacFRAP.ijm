@@ -1,24 +1,11 @@
-// ask the user for the directory with images to process
+// ask the user to pick the directory with individual FRAP.tif series
 dir = getDirectory("Choose directory");
 
-// also ask for the upper threshold limit
+// ask the user for the framerate used for scanning
 scan_speed = getNumber("Scanning speed, sec/frame", 0.743);
-
 
 // get file listing
 list = getFileList(dir);
-newlist = list;
-
-for(i = 0; i < list.length; i++) {
-	if (endsWith(list[i], '/')) {
-		files = getFileList(dir + list[i]);
-		for (n = 0; n < files.length; n++) {
-			files[n] = list[i] + '/' + files[n];
-		}
-		newlist = Array.concat(newlist, files);
-	}
-}
-list = newlist;
 
 // process only tif files
 imglist = newArray(0);
@@ -28,22 +15,21 @@ for(w = 0; w < list.length; w++) {
 	}
 }
 
-
-// loop for all images in the folder
+// loop for all tif files in the folder
 for(w = 0; w < imglist.length; w++) {
-	name = dir + '/' + imglist[w];
-	basename = File.getName(name);
-
-	run("Bio-Formats Windowless Importer", "open=[" + name + "]");
+	imgname = dir + imglist[w];
+	run("Bio-Formats Windowless Importer", "open=[" + imgname + "]");
 	
-//get FRAP series name	
+// get FRAP series name	
 	title = getTitle;
     dotIndex = indexOf(title, ".");
     name = substring(title, 0, dotIndex);
     dir = getInfo("image.directory");
+    
+// user has to decide if drift correction is required. sic! it will fuck up images with low intensities    
     waitForUser("Please scroll through your FRAP time series and decide if it requires drift correction");
+    regq = getBoolean("Would you like to carry out drift correction?\n");
 
-regq = getBoolean("Would you like to carry out drift correction?\n");
 if (regq) {
 	    driftCorrection3D();
         FRAPquantification();
@@ -60,8 +46,12 @@ if (regq) {
 //FRAP profiler requires manual selection of the photobleached area and the whole are of organelle/cell in question. sic! smaller area will be automaticaly considered as photobleacher
 	function FRAPquantification() {
 		run("ROI Manager...");
-		setTool("freehand");
-		waitForUser("Select ROI", "Please select photobleached area and the whole vacuole");
+		setTool("oval");
+		makeOval(250, 250, 20, 20);
+		roiManager("add");
+		roiManager("Select", 0);
+		roiManager("Rename", "photobleached area");
+		waitForUser("Select ROI", "Please select or re-select photobleached area and the whole vacuole");
 		run("Split Channels");
 		close("C2-*");	
 		roiManager("Select", 0)
@@ -69,16 +59,15 @@ if (regq) {
         selectWindow("Log");
         saveAs( dir + name +" FRAP results.txt");         
         run("Close");
-        close("/*");	
         close("C1*");	
         close("offsetFRAP:*");	
         run("Images to Stack", "name=[FRAP plots] title=[] use");
         run("Make Montage...", "columns=2 rows=2 scale=1 label");
         saveAs("png", dir + name +" FRAPplots.png"); 
         run("Close All");
-        selectWindow("ROI Manager");
-        run("Close");
         selectWindow("Plot Values");
         run("Close");   
         }
+        selectWindow("ROI Manager");
+        run("Close");
 }
