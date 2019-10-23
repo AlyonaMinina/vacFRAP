@@ -1,22 +1,13 @@
-//save files as individual tiffs (sic! FRAP subfolder in the project not allowed)
+// save FRAP series as individual tif files (sic! FRAP subfolders in the project are not allowed)
 run("Bio-Formats Macro Extensions");
-// ask the user for the directory with images to process
+
+// pcik the directory with Leica project file
 dir = getDirectory("Choose directory");
+
 // get file listing
 list = getFileList(dir);
 newlist = list;
-// expand directories -- we only recurse one level deep
-// (i.e. main directory with subdirs for each experiment
-for(i = 0; i < list.length; i++) {
-	if (endsWith(list[i], '/')) {
-		files = getFileList(dir + list[i]);
-		for (n = 0; n < files.length; n++) {
-			files[n] = list[i]  + files[n];
-		}
-		newlist = Array.concat(newlist, files);
-	}
-}
-list = newlist;
+
 // process only images
 images = newArray(0);
 for(w = 0; w < list.length; w++) {
