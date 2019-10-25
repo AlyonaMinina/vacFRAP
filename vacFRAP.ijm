@@ -4,7 +4,7 @@ dir = getDirectory("Choose directory");
 // ask the user for the framerate used for scanning
 scan_speed = getNumber("Scanning speed, sec/frame", 0.743);
 //Gaussian blur might help to average out noise that might have a big impact whenROI is very small
-//Gaussian_Blur = getNumber("Gaussian Blur", 1);
+Gaussian_Blur = getNumber("Gaussian Blur", 1);
 
 // get file listing
 list = getFileList(dir);
@@ -47,9 +47,9 @@ if (regq) {
     	}
 //FRAP profiler requires manual selection of the photobleached area and the whole are of organelle/cell in question. sic! smaller area will be automaticaly considered as photobleacher
 	function FRAPquantification() {
-		//run("Gaussian Blur...", "sigma=Gaussian_Blur stack");
+		run("Gaussian Blur...", "sigma=Gaussian_Blur stack");
 		run("ROI Manager...");
-		setTool("oval");
+		setTool("freehand");
 		makeOval(250, 250, 20, 20);
 		roiManager("add");
 		roiManager("Select", 0);
